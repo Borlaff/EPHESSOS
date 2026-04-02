@@ -1,0 +1,15 @@
+sphinx
+sphinx-rtd-theme
+sphinx-design
+sphinx-tabs
+astropy
+astroquery
+matplotlib
+numpy
+pandas
+scipy
+tqdm
+setuptools
+astropy-healpix
+pytest
+ipython

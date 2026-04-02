@@ -1,0 +1,66 @@
+[build-system]
+requires = ["setuptools>=61.0", "Cython >=0.29.21", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ephessos"
+version = "1.0.0"
+description = "Ephemeris for Solar System Objects with JPL/Horizons"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "BSD"}
+authors = [
+    {name = "Alejandro S. Borlaff", email = "a.s.borlaff@nasa.gov"}, {name = "Jessie Dotson", email = "jessie.dotson@nasa.gov"}
+]
+keywords = ["HWO", "SSOs", "Horizons", "JPL"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Topic :: Utilities",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+
+dependencies = [
+    "numpy",
+    "tqdm",
+    "pandas",
+    "astroquery",
+    "matplotlib",
+    "astropy",
+    "pytest",
+    "ipython",
+    "sphinx", "sphinx-rtd-dark-mode", "sphinxcontrib-video",
+]
+
+[project.urls]
+Homepage = "https://github.com/Borlaff/EPHESSOS"
+Repository = "https://github.com/Borlaff/EPHESSOS"
+Tracker = "https://github.com/Borlaff/EPHESSOS/issues"
+Documentation = "https://ephessos.readthedocs.io/en/stable/"
+"Source Code" = "https://github.com/Borlaff/EPHESSOS"
+
+
+[tool.setuptools]
+packages = ["ephessos"]
+
+[tool.setuptools.package-data]
+rosalia = ["*.mplstyle", "*.csv", "*.txt", "images/*", "bin/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["ephessos"]
+python_files = ["test_*.py", "*_test.py"]
+addopts = "-v"
+
+[tool.black]
+line-length = 100
+target-version = ["py39", "py310", "py311", "py312", "py313"]
+
+[tool.isort]
+profile = "black"
+line_length = 100
