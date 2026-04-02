@@ -43,7 +43,8 @@ def sso_query_to_horizons(designation, epoch=None, eccentricity=None, node=None,
     t_start = Time(mjd_start, format='mjd')
     t_end = Time(mjd_end, format='mjd')
 
-
+    if verbose: 
+        print("--designation="+designation+" --epoch="+str(epoch)+" --eccentricity="+str(eccentricity)+" --node="+str(node)+", --arg_perihelion="+str(arg_perihelion)+" --inclination="+str(inclination)+" --mean_anomaly="+str(mean_anomaly)+" --semimajor_axis="+str(semimajor_axis)+" --mean_motion="+str(mean_motion)+" --mjd_start="+str(mjd_start)+" --mjd_end="+str(mjd_end)+" --step_size="+step_size)
 
     """
     # request_url = request_url + "&COMMAND='1'"

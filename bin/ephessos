@@ -1,0 +1,59 @@
+#!/usr/bin/env python
+
+import ephessos as ep
+import argparse
+import yaml
+import glob
+from astropy.time import Time
+
+
+
+def go(args):
+
+    if (args.eccentricity is None):
+        print('Warning! Please input a some Heliocentric Ecliptic Osculating Elements. Check https://ssd-api.jpl.nasa.gov/doc/horizons.html for more information.')
+        print('EPHESSOS / Ephemeris for Solar System Objects with JPL/Horizons')
+        # print('EXAMPLE: ephessos --mjdstart 58849.0 --mjdend 61042.0')
+        return
+    
+    else:        
+        horizons_dataframe = ep.core.sso_query_to_horizons(designation=args.designation, 
+                      epoch=args.epoch, 
+                      eccentricity=args.eccentricity, 
+                      node=args.node, 
+                      arg_perihelion=args.arg_perihelion, 
+                      inclination=args.inclination, 
+                      mean_anomaly=args.mean_anomaly, 
+                      semimajor_axis=args.semimajor_axis, 
+                      mean_motion=args.mean_motion, 
+                      mjd_start=args.mjdstart, 
+                      mjd_end=args.mjdend, 
+                      step_size=args.step_size, 
+                      verbose=True)
+    
+    
+        horizons_dataframe.to_csv(args.output, index=False)
+        print(f"Ephemeris data saved to {args.output}") 
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(
+        description='EPHESSOS / Ephemeris for Solar System Objects with JPL/Horizons',
+        epilog='EXAMPLE: %(prog)s nea_database.txt',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('--designation', type=str, default=None, help='Designation of the solar system object')
+    parser.add_argument('--epoch',   type=float, default=None, help='Julian Date of the osculating elements')
+    parser.add_argument('--eccentricity', type=float, default=None, help='Eccentricity of the orbit')
+    parser.add_argument('--node',   type=float, default=None, help='Longitude of the ascending node')
+    parser.add_argument('--arg_perihelion', type=float, default=None, help='Argument of perihelion')
+    parser.add_argument('--inclination',   type=float, default=None, help='Inclination of the orbit')
+    parser.add_argument('--mean_anomaly', type=float, default=None, help='Mean anomaly')
+    parser.add_argument('--semimajor_axis', type=float, default=None, help='Semimajor axis of the orbit')
+    parser.add_argument('--mean_motion', type=float, default=None, help='Mean motion')
+    parser.add_argument('--mjdstart', type=float, default=None, help='Modified Julian Date of the start of the ephemeris')
+    parser.add_argument('--mjdend',   type=float, default=None, help='Modified Julian Date of the end of the ephemeris')
+    parser.add_argument('--step_size',   type=str, default=None, help='Step size for the ephemeris. Example values: "1d" for 1 day, "12h" for 12 hours, "1h" for 1 hour, etc.')
+    parser.add_argument('--output',   type=str, default="horizons_ephemeris.csv", help='Output file for the ephemeris data. Default is "horizons_ephemeris.csv".')
+    parser.add_argument('--verbose',   type=float, default=None, help='Verbosity level')
+    args = parser.parse_args()
+
+    go(args)
