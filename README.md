@@ -43,7 +43,7 @@ mjd_start = Time('2024-01-01T00:00:00', format='isot', scale='utc').mjd
 mjd_end = Time('2024-01-15T00:00:00', format='isot', scale='utc').mjd
 
 # Query Horizons for Eros (designation: 00433)
-eros_data = ep.core.sso_query_to_horizons(
+eros_data = ep.core.ephessos(
     designation="00433",
     mjd_start=mjd_start,
     mjd_end=mjd_end,
@@ -72,7 +72,7 @@ nea_table = ep.core.read_mpc_nea_file("path/to/nea.txt")
 
 # Query ephemeris for the first object
 first_object = nea_table.iloc[0]
-data = ep.core.sso_query_to_horizons(
+data = ep.core.ephessos(
     designation=first_object["Designation"],
     epoch=first_object["Epoch"],
     eccentricity=first_object["Eccentricity"],
@@ -89,9 +89,55 @@ data = ep.core.sso_query_to_horizons(
 ```
 
 
-## Documentation
+## Command Line Interface
 
-Full documentation is available at: [https://ephessos.readthedocs.io/](https://ephessos.readthedocs.io/)
+EPHESSOS also provides a command-line interface through the `ephessos` executable, which allows you to query ephemeris data directly from the terminal without writing Python code.
+
+### Basic Usage
+
+After installation, you can use the `ephessos` command to generate ephemeris data. You must provide the orbital elements and time range:
+
+```bash
+ ephessos --designation=433 --epoch=2461000.5 --eccentricity=0.222836 --node=304.27008 --arg_perihelion=178.92978 --inclination=10.82847 --mean_anomaly=310.55432 --semimajor_axis=1.458121 --mean_motion=0.55977529 --mjdstart=58849.0 --mjdend=61042.0 --step_size=1d --output="eros_ephem.csv"
+```
+
+### Required Parameters
+
+- `--designation`: Object designation (e.g., "00433" for Eros)
+- `--epoch`: Julian Date of the osculating elements
+- `--eccentricity`: Orbital eccentricity
+- `--node`: Longitude of the ascending node (degrees)
+- `--arg_perihelion`: Argument of perihelion (degrees)
+- `--inclination`: Orbital inclination (degrees)
+- `--mean_anomaly`: Mean anomaly (degrees)
+- `--semimajor_axis`: Semi-major axis (AU)
+- `--mean_motion`: Mean motion (degrees/day)
+- `--mjdstart`: Start time as Modified Julian Date
+- `--mjdend`: End time as Modified Julian Date
+
+### Optional Parameters
+
+- `--step_size`: Time step for ephemeris (default: "1d" for 1 day)
+  - Examples: "1d", "12h", "6h", "1h", "30m"
+- `--output`: Output CSV filename (default: "horizons_ephemeris.csv")
+- `--verbose`: Enable verbose output
+
+The output will be a CSV file containing columns for:
+- Date/time information
+- Right Ascension and Declination (ICRF)
+- Apparent magnitude
+- Distance from observer and Sun
+- And other ephemeris quantities
+
+### Converting Dates to MJD
+
+To convert calendar dates to Modified Julian Dates for use with `--mjdstart` and `--mjdend`, you can use online converters or Python:
+
+```python
+from astropy.time import Time
+t = Time('2024-01-01T00:00:00', format='isot', scale='utc')
+print(f"MJD: {t.mjd}")
+```
 
 ## Contributing
 

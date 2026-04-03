@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ephessos"
-version = "1.0.0"
+version = "1.0.3"
 description = "Ephemeris for Solar System Objects with JPL/Horizons"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -34,7 +34,7 @@ dependencies = [
     "matplotlib",
     "astropy",
     "pytest",
-    "ipython",
+    "ipython","twine", "build",
     "sphinx", "sphinx-rtd-dark-mode", "sphinxcontrib-video",
 ]
 

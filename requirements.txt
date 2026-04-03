@@ -13,3 +13,5 @@ setuptools
 astropy-healpix
 pytest
 ipython
+build
+twine

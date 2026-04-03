@@ -17,7 +17,7 @@ def go(args):
         return
     
     else:        
-        horizons_dataframe = ep.core.sso_query_to_horizons(designation=args.designation, 
+        horizons_dataframe = ep.core.ephessos(designation=args.designation, 
                       epoch=args.epoch, 
                       eccentricity=args.eccentricity, 
                       node=args.node, 

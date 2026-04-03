@@ -4,7 +4,7 @@ import astropy.units as u
 import numpy as np
 import pandas as pd
 
-def sso_query_to_horizons(designation, epoch=None, eccentricity=None, node=None, arg_perihelion=None, inclination=None, mean_anomaly=None, semimajor_axis=None, mean_motion=None, mjd_start=58849.0, mjd_end=61042.0, step_size="1d", verbose=False):
+def ephessos(designation, epoch=None, eccentricity=None, node=None, arg_perihelion=None, inclination=None, mean_anomaly=None, semimajor_axis=None, mean_motion=None, mjd_start=58849.0, mjd_end=61042.0, step_size="1d", verbose=False):
     # Example of a HTTP API Request to Horizons: 
     request_url = "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&"
     # request_url = "https://ssd.jpl.nasa.gov/api/horizons.api?"
