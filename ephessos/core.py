@@ -51,8 +51,6 @@ def ephessos(designation="Default", epoch=None, eccentricity=None, perihelion_di
     A =   str(df.iloc[0]["Semimajor_Axis"])	# au 	Semi-major axis (see note above)
     N =	  str(df.iloc[0]["Mean_Motion"]) # deg/d 	Mean motion (see note above)
     """
-    print("TODO: ping this to https://www.minorplanetcenter.net/iau/MPCORB/MPCORB.DAT")
-    print("Check tess-ephem! at github")
     OBJECT = designation # 	Name of user input object
     if epoch == "K25BL":
         EPOCH = Time('2025-11-21T00:00:00', format='isot', scale='tt').jd
@@ -153,7 +151,11 @@ def ephessos(designation="Default", epoch=None, eccentricity=None, perihelion_di
 
     # print(csv_table_list)
 
-    horizons_dataframe = pd.DataFrame(np.array(csv_table_list), columns=horizons_column_names.split(','))
+    horizons_column_names_list = horizons_column_names.split(',')
+    horizons_column_names_filtered = []
+    for horizon_column_name in horizons_column_names_list:
+        horizons_column_names_filtered.append(horizon_column_name.replace(" ",""))
+    horizons_dataframe = pd.DataFrame(np.array(csv_table_list), columns=horizons_column_names_filtered)
 
     ra_icrf = np.zeros(len(horizons_dataframe), dtype=object)
     dec_icrf = np.zeros(len(horizons_dataframe), dtype=object)
@@ -163,8 +165,8 @@ def ephessos(designation="Default", epoch=None, eccentricity=None, perihelion_di
     time_column_name = horizons_dataframe.columns[0]
 
     for i in range(len(horizons_dataframe)):
-        ra_icrf[i] = horizons_dataframe[" R.A._(ICRF)"].iloc[i][1:].replace(" ",":")
-        dec_icrf[i] = horizons_dataframe[" DEC__(ICRF)"].iloc[i][1:].replace(" ",":")
+        ra_icrf[i] = horizons_dataframe["R.A._(ICRF)"].iloc[i][1:].replace(" ",":")
+        dec_icrf[i] = horizons_dataframe["DEC__(ICRF)"].iloc[i][1:].replace(" ",":")
         date_hms[i] = translate_horizons_date_to_date_hms(horizons_dataframe[time_column_name].iloc[i])[1:]
         mjd[i] = Time(date_hms[i], format='iso').mjd    
 
