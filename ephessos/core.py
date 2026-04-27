@@ -1,10 +1,10 @@
 from astropy.time import Time
 from astropy.table import vstack
-import astropy.units as u
 import numpy as np
 import pandas as pd
+from datetime import datetime
 
-def ephessos(designation, epoch=None, eccentricity=None, node=None, arg_perihelion=None, inclination=None, mean_anomaly=None, semimajor_axis=None, mean_motion=None, mjd_start=58849.0, mjd_end=61042.0, step_size="1d", verbose=False):
+def ephessos(designation=None, epoch=None, eccentricity=None, node=None, arg_perihelion=None, inclination=None, mean_anomaly=None, semimajor_axis=None, mean_motion=None, perihelion_distance=None, perihelion_date=None, H_mag=None, G_slope=None, mjd_start=58849.0, mjd_end=61042.0, step_size="1d", verbose=False):
     # Example of a HTTP API Request to Horizons: 
     request_url = "https://ssd.jpl.nasa.gov/api/horizons.api?format=text&"
     # request_url = "https://ssd.jpl.nasa.gov/api/horizons.api?"
@@ -14,8 +14,8 @@ def ephessos(designation, epoch=None, eccentricity=None, node=None, arg_periheli
     EPOCH = df.iloc[0]["Epoch"] 	  	# Julian Day number (JDTDB) of osculating elements
     ECLIP = "J2000" 	  	# Reference ecliptic frame of elements: J2000 or B1950. J2000 assumes the IAU76/80 J2000 obliquity of 84381.448 arcsec relative to the ICRF reference frame. B1950 assumes FK4/B1950 obliquity of 84404.8362512 arcsec.
     EC =  str(df.iloc[0]["Eccentricity"]) # 	  	Eccentricity
-    # QR = 	# au 	Perihelion distance (see note above)
-    # TP = 	#   	Perihelion Julian Day number (see note above)
+    QR = 	# au 	Perihelion distance (see note above)
+    TP = 	#   	Perihelion Julian Day number (see note above)
     OM =  str(df.iloc[0]["Node"])	# deg 	Longitude of ascending node wrt ecliptic
     W =   str(df.iloc[0]["Arg_Perihelion"])	# deg 	Argument of perihelion wrt ecliptic
     IN =  str(df.iloc[0]["Inclination"])	# deg 	Inclination wrt ecliptic
@@ -24,17 +24,19 @@ def ephessos(designation, epoch=None, eccentricity=None, node=None, arg_periheli
     N =	  str(df.iloc[0]["Mean_Motion"]) # deg/d 	Mean motion (see note above)
     """
     OBJECT = designation # 	Name of user input object
-    EPOCH = epoch 	  	# Julian Day number (JDTDB) of osculating elements
+    EPOCH = str(epoch) 	  	# Julian Day number (JDTDB) of osculating elements
     ECLIP = "J2000" 	  	# Reference ecliptic frame of elements: J2000 
     EC =  str(eccentricity) # 	  	Eccentricity
-    # QR = 	# au 	Perihelion distance (see note above
-    # TP = 	#   	Perihelion Julian Day number (see note above)
+    QR =  str(perihelion_distance)	# au 	Perihelion distance (see note above)
+    TP =  str(perihelion_date)	#   	Perihelion Julian Day number (see note above)
     OM =  str(node)	# deg 	Longitude of ascending node wrt ecliptic
     W =   str(arg_perihelion)	# deg 	Argument of perihelion wrt ecliptic
     IN =  str(inclination)    # deg 	Inclination wrt ecliptic
     MA =  str(mean_anomaly)	# deg 	Mean anomaly (see note above)
     A =   str(semimajor_axis)	# au 	Semi-major axis
     N =	  str(mean_motion) # deg/d 	Mean motion (see note above)
+    H = str(H_mag) # Absolute magnitude
+    G = str(G_slope) # Slope parameter
     
     # HEOE = ';TEST,2460400.5,1.5,0.2,10.5,45.0,30.0,20240401,1.0,J2000'
     
@@ -54,8 +56,9 @@ def ephessos(designation, epoch=None, eccentricity=None, node=None, arg_periheli
         request_url = request_url + "COMMAND='" + OBJECT + "'" 
     else:
         request_url = request_url + "COMMAND=';'" 
-    if designation is not None: request_url = request_url + "&OBJECT="+OBJECT
-    if epoch is not None: request_url = request_url + "&EPOCH=2461000.83333"#+EPOCH
+    #if designation is not None: request_url = request_url + "&OBJECT="+OBJECT
+    #if epoch is not None: request_url = request_url + "&EPOCH=2461000.83333"#+EPOCH
+    if epoch is not None: request_url = request_url + "&EPOCH="+EPOCH
     request_url = request_url + "&ECLIP="+ECLIP
     if eccentricity is not None: request_url = request_url + "&EC="+EC 
     if node is not None: request_url = request_url + "&OM="+OM 
@@ -63,18 +66,22 @@ def ephessos(designation, epoch=None, eccentricity=None, node=None, arg_periheli
     if inclination is not None: request_url = request_url + "&IN="+IN 
     if mean_anomaly is not None: request_url = request_url + "&MA="+MA 
     if semimajor_axis is not None: request_url = request_url + "&A="+A 
+    if perihelion_distance is not None: request_url = request_url + "&QR="+QR 
+    if perihelion_date is not None: request_url = request_url + "&TP="+TP
+    if H_mag is not None: request_url = request_url + "&H="+H
+    if G_slope is not None: request_url = request_url + "&G="+G 
     # request_url = request_url + "&N="+N 
 
     # request_url = request_url + "&COMMAND='499'"
     request_url = request_url + "&OBJ_DATA='YES'" 
     request_url = request_url + "&MAKE_EPHEM='YES'" 
     request_url = request_url + "&EPHEM_TYPE='OBSERVER'" 
-    request_url = request_url + "&CENTER='500@399'" 
+    request_url = request_url + "&CENTER='500@32'"  # 500@32 is the sun & Earth-Moon Barycenter L2 (SEMB-L2)
     request_url = request_url + "&START_TIME='" + t_start.isot + "'" 
     request_url = request_url + "&STOP_TIME='"+ t_end.isot + "'" 
     request_url = request_url + "&STEP_SIZE='" + step_size + "'"
     request_url = request_url + "&CSV_FORMAT='YES'" 
-    request_url = request_url + "&QUANTITIES='1,2,3,4,5,6,7,8,9,10,20,23,24,25,27,29'"
+    request_url = request_url + "&QUANTITIES='1,2,3,4,5,6,7,8,9,10,19,20,23,24,25,27,29'"
     # request_url = request_url.replace(",", "%3B")
 
     import urllib.request
@@ -88,6 +95,13 @@ def ephessos(designation, epoch=None, eccentricity=None, node=None, arg_periheli
     mystr = mybytes.decode("utf8")
     fp.close()
     
+    #this provides some insight if the query is not working.  It would be good to include a graceful exit within this if statement in the future.
+    if len(mystr) < 1000:
+        print("Error: Horizons query returned a short response. Check the request URL and parameters.")
+        print("Request URL:", request_url)
+        print("Response:")
+        print(mystr)
+   
     lines_horizons_query = np.array(mystr.split('\n'))
     id_start_of_table = np.where(lines_horizons_query == '$$SOE')[0][0]
     id_end_of_table = np.where(lines_horizons_query == '$$EOE')[0][0]
@@ -139,7 +153,7 @@ def translate_horizons_date_to_date_hms(horizons_date):
 
 
 
-def read_mpc_nea_file(file_path):
+def read_mpc_nea_file(file_path, verbose=False):
     # Define the exact character ranges based on the MPC schema
     # Note: pandas uses 0-based indexing and the 'stop' value is exclusive
     col_specification = [
@@ -194,5 +208,69 @@ def read_mpc_nea_file(file_path):
     df["Designation"] = df["Designation"].astype(str)
 
     # Preview the first few rows
-    print(df.head())
+    if verbose:
+        print(df.head())
+    return(df)
+
+def read_mpc_comet_file(file_path, verbose=False):
+    # Define the exact character ranges based on the MPC schema
+    # Note: pandas uses 0-based indexing and the 'stop' value is exclusive
+    col_specification = [
+        (0, 4),    # Periodic number
+        (4, 5),    # Orbit type (C, P, D, etc.)
+        (5, 12),   # Designation (packed)
+        (14, 18),  # Perihelion Year
+        (19, 21),  # Perihelion Month
+        (21, 29),  # Perihelion Day
+        (30, 39),  # Perihelion distance q (AU)
+        (41, 49),  # Eccentricity e
+        (51, 59),  # Argument of perihelion (deg)
+        (61, 69),  # Longitude of ascending node (deg)
+        (71, 79),  # Inclination (deg)
+        (81, 85),  # Epoch Year
+        (86,87),  # Epoch Month
+        (88, 89),  # Epoch Day
+        (91, 95),  # Absolute Magnitude H
+        (96, 100), # Slope Parameter G
+        (102, 158) # Comet Name
+    ]
+
+    column_names = [
+        'number', 'type', 'designation', 'peri_year', 'peri_month', 'peri_day', 
+        'q', 'e', 'arg_peri', 'node', 'inclination', 'epoch_year', 'epoch_month', 'epoch_day', 
+        'H', 'G', 'name'
+    ]
+
+    # Read the file
+    df = pd.read_fwf(
+        file_path, 
+        colspecs=col_specification, 
+        names=column_names, 
+        header=None
+    )
+
+    #fix up some time colmns that have missing values.  This is a bit of a hack, but it allows us to convert the columns to integers without losing data.  We can improve this in the future by adding a column that indicates whether the value was imputed or not.
+    df.replace(r'^\s*$', np.nan, regex=True, inplace=True)
+
+    df[['ID', 'shortName']] = df.name.str.split(r"\(", expand=True)
+    df.replace({'shortName': r'\)'}, '', regex=True, inplace=True)
+    df['peri_year'] = df['peri_year'].astype(int)
+    df['peri_month'] = df['peri_month'].astype(int)
+    df['peri_day'] = df['peri_day'].astype(int)
+    df['peri_jd'] = df.apply(lambda row: Time(datetime(row['peri_year'], row['peri_month'], row['peri_day']), scale='utc').jd, axis=1)
+
+    # fill in missing epochs with the most common value
+    most_common_epoch_year = df['epoch_year'].mode()[0]
+    most_common_epoch_month = df['epoch_month'].mode()[0]
+    most_common_epoch_day = df['epoch_day'].mode()[0]   
+    df.fillna({'epoch_year': most_common_epoch_year, 'epoch_month': most_common_epoch_month, 'epoch_day': most_common_epoch_day}, inplace=True   )
+    
+    df['epoch_year'] = df['epoch_year'].astype(int)
+    df['epoch_month'] = df['epoch_month'].astype(int)
+    df['epoch_day'] = df['epoch_day'].astype(int)
+    df['epoch_jd'] = df.apply(lambda row: Time(datetime(row['epoch_year'], row['epoch_month'], row['epoch_day']), scale='utc').jd, axis=1) 
+
+    if verbose:
+        print(df.head())
+
     return(df)
