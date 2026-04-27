@@ -2,6 +2,11 @@
 *.DAT
 *.DAT.gz
 
+
+# User 
+*.py.bak
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
