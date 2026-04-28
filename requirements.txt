@@ -16,3 +16,4 @@ ipython
 ipykernel
 build
 twine
+pympc
