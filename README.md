@@ -1,5 +1,4 @@
 # EPHESSOS
-Ephemeris for Solar System Objects with JPL/Horizons
 
 <!-- PROJECT LOGO -->
 <br />
@@ -7,6 +6,17 @@ Ephemeris for Solar System Objects with JPL/Horizons
   <a href="https://github.com/Borlaff/EPHESSOS">
     <img src="https://raw.githubusercontent.com/Borlaff/EPHESSOS/main/media/ephessos_logo.png" alt="EPHESSOS_logo" width="700">
   </a>
+  <p align="center">
+    <h2 align="center">Ephemeris for Solar System Objects with JPL/Horizons</h2>
+    <br />
+    <a href="https://github.com/Borlaff/ROSALIA">View Demo</a>
+    ·
+    <a href="https://github.com/Borlaff/ROSALIA/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
+    ·
+    <a href="https://github.com/Borlaff/ROSALIA/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
+  </p>
+</div>
+
 
 [![PyPI version](https://badge.fury.io/py/ephessos.svg)](https://pypi.org/project/ephessos/)
 [![License: BSD](https://img.shields.io/badge/License-BSD-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
