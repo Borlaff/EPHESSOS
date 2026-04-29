@@ -1,6 +1,13 @@
 # EPHESSOS
 Ephemeris for Solar System Objects with JPL/Horizons
 
+<!-- PROJECT LOGO -->
+<br />
+<div align="center">
+  <a href="https://github.com/Borlaff/EPHESSOS">
+    <img src="https://raw.githubusercontent.com/Borlaff/EPHESSOS/main/media/ephessos_logo.png" alt="EPHESSOS_logo" width="710" height="437">
+  </a>
+
 [![PyPI version](https://badge.fury.io/py/ephessos.svg)](https://pypi.org/project/ephessos/)
 [![License: BSD](https://img.shields.io/badge/License-BSD-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
