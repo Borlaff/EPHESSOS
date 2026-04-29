@@ -9,11 +9,11 @@
   <p align="center">
     <h2 align="center">Ephemeris for Solar System Objects with JPL/Horizons</h2>
     <br />
-    <a href="https://github.com/Borlaff/ROSALIA">View Demo</a>
+    <a href="https://github.com/Borlaff/EPHESSOS">View Demo</a>
     ·
-    <a href="https://github.com/Borlaff/ROSALIA/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
+    <a href="https://github.com/Borlaff/EPHESSOS/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
     ·
-    <a href="https://github.com/Borlaff/ROSALIA/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
+    <a href="https://github.com/Borlaff/EPHESSOS/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
   </p>
 </div>
 
