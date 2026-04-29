@@ -5,7 +5,7 @@ Ephemeris for Solar System Objects with JPL/Horizons
 <br />
 <div align="center">
   <a href="https://github.com/Borlaff/EPHESSOS">
-    <img src="https://raw.githubusercontent.com/Borlaff/EPHESSOS/main/media/ephessos_logo.png" alt="EPHESSOS_logo" width="710" height="437">
+    <img src="https://raw.githubusercontent.com/Borlaff/EPHESSOS/main/media/ephessos_logo.png" alt="EPHESSOS_logo" width="700">
   </a>
 
 [![PyPI version](https://badge.fury.io/py/ephessos.svg)](https://pypi.org/project/ephessos/)
