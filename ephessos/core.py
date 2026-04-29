@@ -7,7 +7,9 @@ import ephessos as ep
 import os
 ephessos_dir = os.path.dirname(ep.__file__)
 
-def ephessos(sso_search=None, designation="Default", epoch=None, eccentricity=None, perihelion_distance=None, perihelion_date=None, node=None, arg_perihelion=None, inclination=None, mean_anomaly=None, semimajor_axis=None, mean_motion=None, H_mag=None, G_slope=None, obs_center="500@32", mjd_start=58849.0, mjd_end=61042.0, step_size="1d", quantities='1,2,3,4,5,6,7,8,9,10,19,20,23,24,25,27,29', verbose=False):
+def ephessos(sso_search=None, mpc_table=None, designation="Default", name=None, epoch=None, eccentricity=None, perihelion_distance=None, perihelion_date=None, node=None, arg_perihelion=None, inclination=None, mean_anomaly=None, semimajor_axis=None, mean_motion=None, H_mag=None, G_slope=None, obs_center="500@32", mjd_start=58849.0, mjd_end=61042.0, step_size="1d", quantities='1,2,3,4,5,6,7,8,9,10,19,20,23,24,25,27,29', verbose=False):
+    import pandas 
+    from tqdm import tqdm
     """
     ephessos is a function that queries the JPL Horizons API for ephemeris data based on user-provided orbital elements and time range. The function constructs a request URL with the specified parameters, sends the request to the Horizons API, and processes the response to extract the relevant ephemeris data. The resulting data is returned as a pandas DataFrame containing the requested quantities for each time step within the specified range. The function also includes error handling and verbose output options for debugging and user feedback.
         :param str designation: Name of the object to query (default is "Default")
@@ -29,6 +31,63 @@ def ephessos(sso_search=None, designation="Default", epoch=None, eccentricity=No
         :param str quantities: Comma-separated list of quantities to request from the Horizons API (default is '1,2,3,4,5,6,7,8,9,10,19,20,23,24,25,27,29')
         :param bool verbose: If True, prints the request URL and parameters for debugging (default is False)
     """
+    if mpc_table is not None:
+        if verbose: print("Reading from MPC table")
+        mpc_df = read_mpc_nea_file(mpc_table, verbose=False)
+
+        #"Designation", "H", "G", "Epoch", "Mean_Anomaly", "Arg_Perihelion", 
+        #"Node", "Inclination", "Eccentricity", "Mean_Motion", "Semimajor_Axis", 
+        #"Uncertainty", "Ref", "Obs_Count", "Opp_Count", "First_Obs", "Last_Obs_Arc",
+        #"RMS_Resid", "Pert_Coarse", "Pert_Precise", "Comp_Name", "Flags", "Num_ID",
+        #"Full_Name", "Last_Obs_Date"
+
+
+        if isinstance(mpc_df, pandas.DataFrame):
+            ephessos_df_list = [] 
+            for i in tqdm(range(len(mpc_df))):
+                designation = mpc_df.iloc[i]['Full_Name']
+                epoch = mpc_df.iloc[i]['Epoch']
+                eccentricity=mpc_df.iloc[i]['Eccentricity']
+                node=mpc_df.iloc[i]['Node']
+                arg_perihelion=mpc_df.iloc[i]['Arg_Perihelion']
+                inclination=mpc_df.iloc[i]['Inclination']
+                mean_anomaly=mpc_df.iloc[i]['Mean_Anomaly']
+                semimajor_axis=mpc_df.iloc[i]['Semimajor_Axis']
+                mean_motion=mpc_df.iloc[i]['Mean_Motion']
+                H_mag=mpc_df.iloc[i]['H']
+                G_slope=mpc_df.iloc[i]['G']
+
+                ephessos_df = ep.core.ephessos(designation=designation, epoch=epoch, 
+                                 eccentricity=eccentricity, perihelion_distance=perihelion_distance, 
+                                 perihelion_date=perihelion_date, node=node, 
+                                 arg_perihelion=arg_perihelion, inclination=inclination, 
+                                 mean_anomaly=mean_anomaly, semimajor_axis=semimajor_axis, 
+                                 mean_motion=mean_motion, 
+                                 H_mag=H_mag, G_slope=G_slope, 
+                                 obs_center=obs_center, mjd_start=mjd_start, mjd_end=mjd_end, 
+                                 step_size=step_size, quantities=quantities, verbose=verbose)
+    
+                ephessos_df_list.append(ephessos_df)
+            return(ephessos_df_list)    
+
+   
+    if sso_search is not None:
+        if isinstance(sso_search, pandas.DataFrame):
+            ephessos_df_list = [] 
+            for i in tqdm(range(len(sso_search))):
+                # print(cone_search.iloc[i])
+                name = sso_search.iloc[i]['Full_Name']
+                epoch = sso_search.iloc[i]['Epoch']
+
+                ephessos_df = ep.core.ephessos(designation=name, name=name, epoch=epoch,
+                                               obs_center=obs_center,
+                                               mjd_start=mjd_start, mjd_end=mjd_end, 
+                                               step_size=step_size, 
+                                               quantities=quantities, verbose=False)
+    
+                ephessos_df_list.append(ephessos_df)
+            return(ephessos_df_list)
+        
 
     if sso_search is None:
         ephessos_out = _ephessos(designation=designation, epoch=epoch, 
@@ -41,43 +100,11 @@ def ephessos(sso_search=None, designation="Default", epoch=None, eccentricity=No
                                  obs_center=obs_center, mjd_start=mjd_start, mjd_end=mjd_end, 
                                  step_size=step_size, quantities=quantities, verbose=verbose)
         return(ephessos_out)
-    
-    if sso_search is not None:
-        import pandas 
-        if isinstance(sso_search, pandas.DataFrame):
-            from tqdm import tqdm
-            ephessos_df_list = [] 
-            for i in tqdm(range(len(sso_search))):
-                # print(cone_search.iloc[i])
-                designation = sso_search.iloc[i]['Designation']
-                epoch = sso_search.iloc[i]['Epoch']
-                eccentricity = sso_search.iloc[i]['Eccentricity']
-                node = sso_search.iloc[i]['Node']
-                arg_perihelion = sso_search.iloc[i]['Arg_Perihelion']
-                inclination = sso_search.iloc[i]['Inclination']
-                mean_anomaly = sso_search.iloc[i]['Mean_Anomaly']
-                semimajor_axis = sso_search.iloc[i]['Semimajor_Axis']
-                mean_motion = sso_search.iloc[i]['Mean_Motion']
-                H_mag = sso_search.iloc[i]['H']
-                G_slope = sso_search.iloc[i]['G']
-
-                ephessos_df = ep.core.ephessos(designation=designation, epoch=epoch, 
-                                               eccentricity=eccentricity, 
-                                               node=node, 
-                                               arg_perihelion=arg_perihelion, inclination=inclination, 
-                                               mean_anomaly=mean_anomaly, semimajor_axis=semimajor_axis, 
-                                               mean_motion=mean_motion, H_mag=H_mag, 
-                                               G_slope=G_slope, obs_center=obs_center,
-                                               mjd_start=mjd_start, mjd_end=mjd_end, 
-                                               step_size=step_size, 
-                                               quantities=quantities, verbose=False)
-    
-                ephessos_df_list.append(ephessos_df)
-            return(ephessos_df_list)
+ 
     
 
 
-def _ephessos(designation="Default", epoch=None, eccentricity=None, perihelion_distance=None, perihelion_date=None, node=None, arg_perihelion=None, inclination=None, mean_anomaly=None, semimajor_axis=None, mean_motion=None, H_mag=None, G_slope=None, obs_center="500@32", mjd_start=58849.0, mjd_end=61042.0, step_size="1d", quantities='1,2,3,4,5,6,7,8,9,10,19,20,23,24,25,27,29', verbose=False):
+def _ephessos(designation="Default", name=None, epoch=None, eccentricity=None, perihelion_distance=None, perihelion_date=None, node=None, arg_perihelion=None, inclination=None, mean_anomaly=None, semimajor_axis=None, mean_motion=None, H_mag=None, G_slope=None, obs_center="500@32", mjd_start=58849.0, mjd_end=61042.0, step_size="1d", quantities='1,2,3,4,5,6,7,8,9,10,19,20,23,24,25,27,29', verbose=False):
     """
     This is an auxiliary function to ease the input in the main ephessos one
     """
@@ -103,7 +130,6 @@ def _ephessos(designation="Default", epoch=None, eccentricity=None, perihelion_d
     A =   str(df.iloc[0]["Semimajor_Axis"])	# au 	Semi-major axis (see note above)
     N =	  str(df.iloc[0]["Mean_Motion"]) # deg/d 	Mean motion (see note above)
     """
-    OBJECT = designation # 	Name of user input object
     if epoch == "K25BL":
         EPOCH = Time('2025-11-21T00:00:00', format='isot', scale='tt').jd
     else:
@@ -137,12 +163,13 @@ def _ephessos(designation="Default", epoch=None, eccentricity=None, perihelion_d
     """
 
     if eccentricity is None and node is None and arg_perihelion is None and inclination is None and mean_anomaly is None and semimajor_axis is None:
-        request_url = request_url + "COMMAND='" + OBJECT + "'" 
+        request_url = request_url + "COMMAND='" + designation.replace(" ","%20") + "'" 
     else:
         request_url = request_url + "COMMAND=';'" 
     #if designation is not None: request_url = request_url + "&OBJECT="+OBJECT
     #if epoch is not None: request_url = request_url + "&EPOCH="+str(EPOCH)
     if epoch is not None: request_url = request_url + "&EPOCH="+str(EPOCH)
+    #if name is not None: request_url = request_url + "&OBJECT="+str(name.replace(" ","%20"))
     request_url = request_url + "&ECLIP="+ECLIP
     if eccentricity is not None: request_url = request_url + "&EC="+EC 
     if node is not None: request_url = request_url + "&OM="+OM 
@@ -525,7 +552,7 @@ def get_last_mpcorb():
 def download_MPCORB():
     import gzip
     import shutil
-    
+    print("Updating Minor Planet Center Orbits (once daily) ...")
     mpcorb_cache_path = os.path.join(ep.core.ephessos_dir, "MPCORB.DAT.gz")
     mpcorb_url = "https://www.minorplanetcenter.net/iau/MPCORB/MPCORB.DAT.gz"
     download_file(mpcorb_url, verbose=True)
@@ -564,10 +591,10 @@ def cone_search(ra, dec, mjd, search_radius, observatory=None, verbose=False):
     if os.path.exists(xephem_filepath):
         last_modification_time = get_last_modification_time(xephem_filepath)
         if last_modification_time["Delta"].sec > 3600*24:  # If the file is less than a one day old, use it
-            print("Updating MPCORB catalogue...")
+            print("Updating xephem MPCORB catalogue...")
             pympc.update_catalogue()
     else: 
-        print("Downloading MPCORB catalogue...")
+        print("Downloading xephem MPCORB catalogue...")
         pympc.update_catalogue()
 
     matches = pympc.minor_planet_check(ra=ra, dec=dec, epoch=mjd, search_radius=search_radius, observatory=observatory)
