@@ -21,7 +21,7 @@
 [![PyPI version](https://badge.fury.io/py/ephessos.svg)](https://pypi.org/project/ephessos/)
 [![License: BSD](https://img.shields.io/badge/License-BSD-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
-EPHESSOS is a Python library for querying ephemeris data of solar system objects from NASA's JPL Horizons system. It provides an easy interface to retrieve positional and observational data for asteroids, comets, and planets.
+EPHESSOS is a [NASA Ames Research Center](https://www.nasa.gov/space-science-and-astrobiology-at-ames/) Python library for querying ephemeris data of solar system objects from NASA's JPL Horizons system. It provides an easy interface to query positional and observational data for asteroids, comets, and planets. EPHESSOS allows to provide custom orbital elements to JPL/Horizons and retrieve the ephemerides from their server, and to perform positional queries on the Minor Planet Center database. 
 
 ## Features
 
