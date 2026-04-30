@@ -160,7 +160,7 @@ plt.savefig("H2_cone_search.png", dpi=300)
   <a href="https://github.com/Borlaff/EPHESSOS">
     <img src="https://raw.githubusercontent.com/Borlaff/EPHESSOS/main/notebooks/H2_cone_search.png" alt="EPHESSOS cone search example" width="700">
   </a>
-
+</div>
 
 
 ## Command Line Interface
