@@ -33,7 +33,7 @@ def ephessos(sso_search=None, mpc_table=None, designation="Default", name=None, 
     """
     if mpc_table is not None:
         if verbose: print("Reading from MPC table")
-        mpc_df = read_mpc_nea_file(mpc_table, verbose=False)
+        mpc_df = read_mpc_nea_file(mpc_table, verbose=verbose)
 
         #"Designation", "H", "G", "Epoch", "Mean_Anomaly", "Arg_Perihelion", 
         #"Node", "Inclination", "Eccentricity", "Mean_Motion", "Semimajor_Axis", 
@@ -72,18 +72,19 @@ def ephessos(sso_search=None, mpc_table=None, designation="Default", name=None, 
 
    
     if sso_search is not None:
+        if verbose: print("Reading from an EPHESSOS Cone Search")
         if isinstance(sso_search, pandas.DataFrame):
             ephessos_df_list = [] 
             for i in tqdm(range(len(sso_search))):
-                # print(cone_search.iloc[i])
-                name = sso_search.iloc[i]['Full_Name']
-                epoch = sso_search.iloc[i]['Epoch']
+                if verbose: print(sso_search.iloc[i])
+                name = sso_search.iloc[i]['Name']
+                epoch = Time(sso_search.iloc[i]['epoch'], format="jd").isot
 
                 ephessos_df = ep.core.ephessos(designation=name, name=name, epoch=epoch,
                                                obs_center=obs_center,
                                                mjd_start=mjd_start, mjd_end=mjd_end, 
                                                step_size=step_size, 
-                                               quantities=quantities, verbose=False)
+                                               quantities=quantities, verbose=verbose)
     
                 ephessos_df_list.append(ephessos_df)
             return(ephessos_df_list)
@@ -102,8 +103,6 @@ def ephessos(sso_search=None, mpc_table=None, designation="Default", name=None, 
         return(ephessos_out)
  
     
-
-
 def _ephessos(designation="Default", name=None, epoch=None, eccentricity=None, perihelion_distance=None, perihelion_date=None, node=None, arg_perihelion=None, inclination=None, mean_anomaly=None, semimajor_axis=None, mean_motion=None, H_mag=None, G_slope=None, obs_center="500@32", mjd_start=58849.0, mjd_end=61042.0, step_size="1d", quantities='1,2,3,4,5,6,7,8,9,10,19,20,23,24,25,27,29', verbose=False):
     """
     This is an auxiliary function to ease the input in the main ephessos one
@@ -215,6 +214,7 @@ def _ephessos(designation="Default", name=None, epoch=None, eccentricity=None, p
         print(mystr)
    
     lines_horizons_query = np.array(mystr.split('\n'))
+    if verbose: print(lines_horizons_query)
     id_start_of_table = np.where(lines_horizons_query == '$$SOE')[0][0]
     id_end_of_table = np.where(lines_horizons_query == '$$EOE')[0][0]
     id_column_names = id_start_of_table - 2
@@ -271,9 +271,6 @@ def translate_horizons_date_to_date_hms(horizons_date):
     # Convert to ISO format: "2025-01-22T00:00:00"
     date_hms = horizons_date.replace("Jan","01").replace("Feb","02").replace("Mar","03").replace("Apr","04").replace("May","05").replace("Jun","06").replace("Jul","07").replace("Aug","08").replace("Sep","09").replace("Oct","10").replace("Nov","11").replace("Dec","12")
     return date_hms
-
-
-
 
 
 def read_mpc_nea_file(file_path, verbose=False):
@@ -340,6 +337,7 @@ def read_mpc_nea_file(file_path, verbose=False):
     if verbose: print(df.head())
     return(df)
 
+
 def read_mpc_comet_file(file_path, verbose=False):
     # Define the exact character ranges based on the MPC schema
     # Note: pandas uses 0-based indexing and the 'stop' value is exclusive
@@ -404,7 +402,6 @@ def read_mpc_comet_file(file_path, verbose=False):
     return(df)
 
 
-
 def read_mpcorb_file(file_path, skiprows=43):
     """
     read_mpcorb_file reads the MPCORB.DAT file from the Minor Planet Center and parses it into a pandas DataFrame. The function defines the exact character ranges for each column based on the MPC schema and uses pandas' read_fwf function to read the fixed-width formatted file. It also converts certain columns to numeric types and ensures that the Designation column is treated as a string. The skiprows parameter allows skipping the header lines of the MPCORB.DAT file, which typically contain metadata and comments.
@@ -467,7 +464,6 @@ def read_mpcorb_file(file_path, skiprows=43):
     df["Designation"] = df["Designation"].astype(str)
 
     return df
-
 
 
 def get_last_modification_time(file_path):
@@ -549,6 +545,7 @@ def get_last_mpcorb():
     else:
         return(download_MPCORB())
    
+   
 def download_MPCORB():
     import gzip
     import shutil
@@ -565,6 +562,33 @@ def download_MPCORB():
             
 
 def cone_search(ra, dec, mjd, search_radius, observatory=None, verbose=False):
+    from astroquery.imcce import Skybot
+    from astropy.coordinates import SkyCoord
+    from astropy.time import Time
+    import astropy.units as u
+
+    """
+    Query SkyBoT for solar system objects around (RA, Dec) at a given epoch.
+
+    Parameters:
+        ra_deg (float): Right ascension in degrees
+        dec_deg (float): Declination in degrees
+        epoch_iso (str): ISO date/time, e.g., "2006-03-12T04:00:00"
+        radius_arcmin (float): Search radius in arcminutes
+
+    Returns:
+        table: An astropy Table containing objects found in the region.
+    """
+    coord = SkyCoord(ra * u.deg, dec * u.deg, frame="icrs")
+    epoch = Time(mjd, format="mjd")
+
+    # Query SkyBoT
+    result = Skybot.cone_search(coord, search_radius * u.arcsec, epoch, location=observatory)
+    # https://www.minorplanetcenter.net/iau/lists/ObsCodes.html
+    return(result.to_pandas())
+
+
+def DEPRECATED_cone_search(ra, dec, mjd, search_radius, observatory=None, verbose=False):
     """
     cone_search performs a cone search around the given RA, Dec, and epoch with the specified search radius to find potential matches in the MPCORB.DAT file. It uses the pympc library to perform the initial cone search and then cross-references the results with the MPCORB.DAT file to find corresponding entries.
         :param float ra: Right Ascension in degrees
@@ -624,7 +648,12 @@ def find_sso_in_mpcorb(matches, last_mpcorb):
     for i in tqdm(range(len(matches["name"]))):
         os.system('grep "' + str(matches["name"][i]) + '" ' + last_mpcorb + ' > ' + temp_last_mpcorb)
         # Read the temporary file containing the single SSO into a DataFrame
-        sso_matches.append(ep.core.read_mpcorb_file(file_path=temp_last_mpcorb, skiprows=0))
+        object_mpc_table = ep.core.read_mpcorb_file(file_path=temp_last_mpcorb, skiprows=0)
+        #print(object_mpc_table["Designation"][0])
+        #print(object_mpc_table["Full_Name"][0])
+        #print(matches["name"][i])
+        if object_mpc_table["Full_Name"][0] == matches["name"][i]:
+            sso_matches.append(object_mpc_table)
 
     import pandas as pd
     return(pd.concat(sso_matches))
